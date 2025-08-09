@@ -145,6 +145,9 @@ export const ${name}Feature = createFeature({
     on(${name}Actions.load${cap}Failure, (state, action): I${cap}State => ({ ...state, error:true, pending: false }))
   )
 });
+
+export const { selectError, selectList, selectPending } =
+  ${name}Feature;
 `;
 }
 /**
