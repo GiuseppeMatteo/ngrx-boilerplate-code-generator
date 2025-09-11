@@ -104,12 +104,13 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ${name}Actions } from './${name}.actions';
 import { map } from 'rxjs/operators';
 
-export const ${name}Effects = createEffect((_actions = inject(Actions)) => {
-  return _actions.pipe(
-    ofType((${name}Actions.load${cap}),
-    map(() => ${name}Actions.load${cap}Success({ data: [] }))
-  );
-},
+export const ${name}Effects = createEffect(
+  (_actions = inject(Actions)) => {
+    return _actions.pipe(
+      ofType(${name}Actions.load${cap}),
+      map(() => ${name}Actions.load${cap}Success({ items: [] }))
+    );
+  },
   { functional: true }
 );
 `;
