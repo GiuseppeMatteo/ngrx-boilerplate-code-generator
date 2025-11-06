@@ -104,9 +104,9 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ${name}Actions } from './${name}.actions';
 import { map } from 'rxjs/operators';
 
-export const ${name}Effects = createEffect(
-  (_actions = inject(Actions)) => {
-    return _actions.pipe(
+export const ${name}LoadEffects = createEffect(
+  (actions = inject(Actions)) => {
+    return actions.pipe(
       ofType(${name}Actions.load${cap}),
       map(() => ${name}Actions.load${cap}Success({ items: [] }))
     );
@@ -122,13 +122,13 @@ function getFeatureTemplate(name: string) {
 import { ${name}Actions } from './${name}.actions';
 
 export interface I${cap}State {
-  list: any[];
+  items: unknow[];
   error: boolean;
   pending: boolean;
 }
 
 const INITIALSTATE: I${cap}State = {
-  list: [],
+  items: [],
   error: false,
   pending: false,
 };
@@ -138,12 +138,12 @@ export const ${name}Feature = createFeature({
   reducer: createReducer(
     INITIALSTATE,
     on(${name}Actions.load${cap}, (state): I${cap}State => ({ ...state, error:false, pending: true })),
-    on(${name}Actions.load${cap}Success, (state, action): I${cap}State => ({ ...state, list: action.items, error:false, pending: false })),
+    on(${name}Actions.load${cap}Success, (state, action): I${cap}State => ({ ...state, items: action.items, error:false, pending: false })),
     on(${name}Actions.load${cap}Failure, (state, action): I${cap}State => ({ ...state, error:true, pending: false }))
   )
 });
 
-export const { selectError, selectList, selectPending } =
+export const { selectError, selectItems, selectPending } =
   ${name}Feature;
 `;
 }
@@ -178,7 +178,9 @@ export function updateAppConfig(
       .find((d) => d.getModuleSpecifierValue() === moduleSpecifier);
     if (existing) {
       const names = existing.getNamedImports().map((n) => n.getName());
-      if (!names.includes(name)) existing.addNamedImport(name);
+      if (!names.includes(name)) {
+        existing.addNamedImport(name);
+      }
     } else {
       sourceFile.addImportDeclaration({
         moduleSpecifier,
@@ -264,7 +266,9 @@ export function updateAppConfig(
   for (const elem of arr.getElements()) {
     // vogliamo solo le chiamate top-level: es. provideEffects(...) come elemento dell'array providers
     const call = elem.asKind(SyntaxKind.CallExpression);
-    if (!call) continue;
+    if (!call) {
+      continue;
+    }
 
     const exprText = call.getExpression().getText();
 
@@ -281,7 +285,9 @@ export function updateAppConfig(
         const already = arrayArg
           .getElements()
           .some((e) => e.getText().trim() === nameEffects);
-        if (!already) arrayArg.addElement(nameEffects);
+        if (!already) {
+          arrayArg.addElement(nameEffects);
+        }
       } else {
         // caso: provideEffects(A, B, ...)
         const argsText = args.map((a) => a.getText()).join(", ");

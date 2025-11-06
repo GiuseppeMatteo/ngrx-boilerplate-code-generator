@@ -30,3 +30,9 @@ Aggiorna inoltre automaticamente il file `app.config.ts` per registrare gli effe
 - Node.js >= 14
 - Progetto Angular con NgRx già installato
 - File `src/app/app.config.ts` presente
+
+# Compilazione
+
+Per la compilazione del pacchetto eseguire in una finestra del terminale
+
+- vsce package

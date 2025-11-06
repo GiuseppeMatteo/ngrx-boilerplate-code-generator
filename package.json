@@ -2,7 +2,7 @@
   "name": "ngrx-boilerplate-code-generator",
   "displayName": "NgRx boilerplate code generator",
   "description": "Estensione VS Code per generare automaticamente file NgRx (actions, effects, feature) e aggiornare app.config.ts",
-  "version": "1.2.1",
+  "version": "1.3.2",
   "publisher": "giuseppefianco",
   "engines": {
     "vscode": "^1.103.0"

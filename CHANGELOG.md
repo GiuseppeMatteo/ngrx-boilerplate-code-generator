@@ -8,3 +8,7 @@ Aggiunta l'icona
 
 v.1.2.1 - 2025-09-11
 Corretta la creazione degli effects
+
+v.1.3.2 - 2025-06-11
+Cambiati i nomi delle variabili
+Corretta la valorizzazione degli oggetti (items) dello store
