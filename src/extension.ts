@@ -90,7 +90,7 @@ export const ${name}Actions = createActionGroup({
   source: '${cap}',
   events: {
     'Load ${cap}': emptyProps(),
-    'Load ${cap} Success': props<{ items: any[] }>(),
+    'Load ${cap} Success': props<{ items: unknown[] }>(),
     'Load ${cap} Failure': emptyProps()
   }
 });
@@ -122,7 +122,7 @@ function getFeatureTemplate(name: string) {
 import { ${name}Actions } from './${name}.actions';
 
 export interface I${cap}State {
-  items: unknow[];
+  items: unknown[];
   error: boolean;
   pending: boolean;
 }
@@ -139,7 +139,7 @@ export const ${name}Feature = createFeature({
     INITIALSTATE,
     on(${name}Actions.load${cap}, (state): I${cap}State => ({ ...state, error:false, pending: true })),
     on(${name}Actions.load${cap}Success, (state, action): I${cap}State => ({ ...state, items: action.items, error:false, pending: false })),
-    on(${name}Actions.load${cap}Failure, (state, action): I${cap}State => ({ ...state, error:true, pending: false }))
+    on(${name}Actions.load${cap}Failure, (state): I${cap}State => ({ ...state, error:true, pending: false }))
   )
 });
 

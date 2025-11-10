@@ -12,3 +12,7 @@ Corretta la creazione degli effects
 v.1.3.2 - 2025-06-11
 Cambiati i nomi delle variabili
 Corretta la valorizzazione degli oggetti (items) dello store
+
+v.1.3.3 - 2025-06-11
+Corretta una definizione
+Eliminato any
