@@ -1,7 +1,7 @@
 # Change Log
 
 v1.1.0 – 2025-08-09
-Aggiunte le select delle proprietà dell'interfaccia della feature.
+Aggiunte le select delle proprietà dell'interfaccia della feature
 
 v.1.2.0 - 2025-09-04
 Aggiunta l'icona
@@ -16,3 +16,6 @@ Corretta la valorizzazione degli oggetti (items) dello store
 v.1.3.3 - 2025-06-11
 Corretta una definizione
 Eliminato any
+
+v.1.4.0 - 2026-02-24
+Creata l'interfaccia degli oggetti (items) dello store

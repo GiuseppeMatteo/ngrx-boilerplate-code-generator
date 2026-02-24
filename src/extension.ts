@@ -27,35 +27,60 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      featureName = normalizeFeatureName(featureName);
+      const normalizedfeatureName = normalizeFeatureName(featureName);
 
       // Cartella fissa: src/app/core/store/<featureName>
       const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
+      // crea l'interfaccia
+      const interfacePath = path.join(
+        workspacePath,
+        "src",
+        "app",
+        "shared",
+        "models"
+      );
+
+      if (!fs.existsSync(interfacePath)) {
+        fs.mkdirSync(interfacePath, { recursive: true });
+      }
+
+      const Ifiles = {
+        [`I${capitalize(normalizedfeatureName)}.ts`]: getInterface(normalizedfeatureName),
+      };
+
+      for (const [filename, content] of Object.entries(Ifiles)) {
+        fs.writeFileSync(path.join(interfacePath, filename), content);
+      }
+
+      vscode.window.showInformationMessage(`Creata l'interfaccia I${capitalize(normalizedfeatureName)} in src/app/shared/models`);
+
+
       const featurePath = path.join(
         workspacePath,
         "src",
         "app",
         "core",
         "store",
-        featureName
+        normalizedfeatureName
       );
 
       fs.mkdirSync(featurePath, { recursive: true });
 
       const files = {
-        [`${featureName}.actions.ts`]: getActionsTemplate(featureName),
-        [`${featureName}.effects.ts`]: getEffectsTemplate(featureName),
-        [`${featureName}.feature.ts`]: getFeatureTemplate(featureName),
+        [`${normalizedfeatureName}.actions.ts`]: getActionsTemplate(normalizedfeatureName),
+        [`${normalizedfeatureName}.effects.ts`]: getEffectsTemplate(normalizedfeatureName),
+        [`${normalizedfeatureName}.feature.ts`]: getFeatureTemplate(normalizedfeatureName),
       };
 
       for (const [filename, content] of Object.entries(files)) {
         fs.writeFileSync(path.join(featurePath, filename), content);
       }
 
-      updateAppConfig(featureName, workspacePath);
+      updateAppConfig(normalizedfeatureName, workspacePath);
 
       vscode.window.showInformationMessage(
-        `File NgRx creati in src/app/store/${featureName}`
+        `File NgRx creati in src/app/store/${normalizedfeatureName}`
       );
     }
   );
@@ -64,33 +89,45 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function normalizeFeatureName(raw: string): string {
-  // Rimuove caratteri non alfanumerici e converte in camelCase
-  const cleaned = raw
-    .replace(/[^a-zA-Z0-9]+/g, " ") // tutto ciò che non è alfanumerico diventa spazio
+  // Rimuove caratteri non alfanumerici, gestisce gli spazi e converte in camelCase
+  return raw
+    .replace(/[^a-zA-Z0-9]+/g, " ") // Trasforma tutto ciò che non è alfanumerico in spazio
     .trim()
-    .split(/\s+/) // separa per spazi
-    .map((word, i) =>
-      i === 0
-        ? word.charAt(0).toLowerCase() + word.slice(1)
-        : word.charAt(0).toUpperCase() + word.slice(1)
-    )
+    .split(/\s+/)
+    .map((word, i) => {
+      const lower = word.toLowerCase();
+      if (i === 0) {
+        return lower;
+      }
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
     .join("");
-  return cleaned;
 }
 
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function getInterface(name: string) {
+  const cap = capitalize(name);
+
+  return `export interface I${cap} {
+      id: string | number;
+      name: string;
+      description: string;
+    }`;
+}
+
 function getActionsTemplate(name: string) {
   const cap = capitalize(name);
   return `import { createActionGroup, props, emptyProps } from '@ngrx/store';
+import { I${cap} } from '@app/shared/models/I${cap}';
 
 export const ${name}Actions = createActionGroup({
   source: '${cap}',
   events: {
     'Load ${cap}': emptyProps(),
-    'Load ${cap} Success': props<{ items: unknown[] }>(),
+    'Load ${cap} Success': props<{ items: I${cap}[] }>(),
     'Load ${cap} Failure': emptyProps()
   }
 });
@@ -103,6 +140,7 @@ function getEffectsTemplate(name: string) {
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ${name}Actions } from './${name}.actions';
 import { map } from 'rxjs/operators';
+import { I${cap} } from '@app/shared/models/I${cap}';
 
 export const ${name}LoadEffects = createEffect(
   (actions = inject(Actions)) => {
@@ -120,9 +158,10 @@ function getFeatureTemplate(name: string) {
   const cap = capitalize(name);
   return `import { createFeature, createReducer, on } from '@ngrx/store';
 import { ${name}Actions } from './${name}.actions';
+import { I${cap} } from '@app/shared/models/I${cap}';
 
 export interface I${cap}State {
-  items: unknown[];
+  items: I${cap}[];
   error: boolean;
   pending: boolean;
 }
@@ -298,9 +337,8 @@ export function updateAppConfig(
             .includes(nameEffects)
         ) {
           // ricrea la call con l'arg aggiunto (metodo robusto)
-          const newCallText = `${call.getExpression().getText()}(${argsText}${
-            argsText ? ", " : ""
-          }${nameEffects})`;
+          const newCallText = `${call.getExpression().getText()}(${argsText}${argsText ? ", " : ""
+            }${nameEffects})`;
           call.replaceWithText(newCallText);
         }
       }
@@ -321,4 +359,4 @@ export function updateAppConfig(
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }

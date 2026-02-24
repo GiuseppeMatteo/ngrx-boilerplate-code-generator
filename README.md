@@ -1,8 +1,8 @@
 # NgRx boilerplate code generator for VS Code
 
 Estensione di VS Code per generare automaticamente i file NgRx (`actions`, `effects`, `feature`) usando le API moderne di NgRx (`createActionGroup`, `createEffect`, `createFeature`).  
-Aggiorna inoltre automaticamente il file `app.config.ts` per registrare gli effects e la feature.
-
+Aggiorna automaticamente il file `app.config.ts` per registrare gli effects e la feature.
+Crea un'interfaccia in src/app/shared/models per la feature.
 ---
 
 ## Funzionalità
@@ -31,8 +31,3 @@ Aggiorna inoltre automaticamente il file `app.config.ts` per registrare gli effe
 - Progetto Angular con NgRx già installato
 - File `src/app/app.config.ts` presente
 
-# Compilazione
-
-Per la compilazione del pacchetto eseguire in una finestra del terminale
-
-- vsce package
