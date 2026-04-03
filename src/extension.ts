@@ -139,14 +139,23 @@ function getEffectsTemplate(name: string) {
   return `import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { ${name}Actions } from './${name}.actions';
-import { map } from 'rxjs/operators';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import { I${cap} } from '@app/shared/models/I${cap}';
+import { HttpClient } from '@angular/common/http';
+import { of } from 'rxjs';
 
 export const ${name}LoadEffects = createEffect(
-  (actions = inject(Actions)) => {
+  (actions = inject(Actions), http = inject(HttpClient)) => {
     return actions.pipe(
       ofType(${name}Actions.load${cap}),
-      map(() => ${name}Actions.load${cap}Success({ items: [] }))
+       mergeMap(() =>
+        http.get<I${cap}[]>('[URL]').pipe(
+          map((items) =>
+            ${name}Actions.load${cap}Success({items})
+          ),
+          catchError(() => of(${name}Actions.load${cap}Failure())),
+        )
+      )
     );
   },
   { functional: true }

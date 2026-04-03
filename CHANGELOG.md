@@ -19,3 +19,6 @@ Eliminato any
 
 v.1.4.0 - 2026-02-24
 Creata l'interfaccia degli oggetti (items) dello store
+
+v.1.5.0 - 2026-03-04
+Modificato l'effect dello store per il caricamento degli oggetti: inject del client http ed utilizzato il catchError

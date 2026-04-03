@@ -55,44 +55,50 @@ function activate(context) {
             vscode.window.showErrorMessage("Nome feature obbligatorio");
             return;
         }
-        featureName = normalizeFeatureName(featureName);
+        const normalizedfeatureName = normalizeFeatureName(featureName);
         // Cartella fissa: src/app/core/store/<featureName>
         const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
         // crea l'interfaccia
         const interfacePath = path.join(workspacePath, "src", "app", "shared", "models");
-        fs.mkdirSync(interfacePath, { recursive: true });
+        if (!fs.existsSync(interfacePath)) {
+            fs.mkdirSync(interfacePath, { recursive: true });
+        }
         const Ifiles = {
-            [`I${capitalize(featureName)}.ts`]: getInterface(featureName),
+            [`I${capitalize(normalizedfeatureName)}.ts`]: getInterface(normalizedfeatureName),
         };
         for (const [filename, content] of Object.entries(Ifiles)) {
             fs.writeFileSync(path.join(interfacePath, filename), content);
         }
-        const featurePath = path.join(workspacePath, "src", "app", "core", "store", featureName);
+        vscode.window.showInformationMessage(`Creata l'interfaccia I${capitalize(normalizedfeatureName)} in src/app/shared/models`);
+        const featurePath = path.join(workspacePath, "src", "app", "core", "store", normalizedfeatureName);
         fs.mkdirSync(featurePath, { recursive: true });
         const files = {
-            [`${featureName}.actions.ts`]: getActionsTemplate(featureName),
-            [`${featureName}.effects.ts`]: getEffectsTemplate(featureName),
-            [`${featureName}.feature.ts`]: getFeatureTemplate(featureName),
+            [`${normalizedfeatureName}.actions.ts`]: getActionsTemplate(normalizedfeatureName),
+            [`${normalizedfeatureName}.effects.ts`]: getEffectsTemplate(normalizedfeatureName),
+            [`${normalizedfeatureName}.feature.ts`]: getFeatureTemplate(normalizedfeatureName),
         };
         for (const [filename, content] of Object.entries(files)) {
             fs.writeFileSync(path.join(featurePath, filename), content);
         }
-        updateAppConfig(featureName, workspacePath);
-        vscode.window.showInformationMessage(`File NgRx creati in src/app/store/${featureName}`);
+        updateAppConfig(normalizedfeatureName, workspacePath);
+        vscode.window.showInformationMessage(`File NgRx creati in src/app/store/${normalizedfeatureName}`);
     });
     context.subscriptions.push(disposable);
 }
 function normalizeFeatureName(raw) {
-    // Rimuove caratteri non alfanumerici e converte in camelCase
-    const cleaned = raw
-        .replace(/[^a-zA-Z0-9]+/g, " ") // tutto ciò che non è alfanumerico diventa spazio
+    // Rimuove caratteri non alfanumerici, gestisce gli spazi e converte in camelCase
+    return raw
+        .replace(/[^a-zA-Z0-9]+/g, " ") // Trasforma tutto ciò che non è alfanumerico in spazio
         .trim()
-        .split(/\s+/) // separa per spazi
-        .map((word, i) => i === 0
-        ? word.charAt(0).toLowerCase() + word.slice(1)
-        : word.charAt(0).toUpperCase() + word.slice(1))
+        .split(/\s+/)
+        .map((word, i) => {
+        const lower = word.toLowerCase();
+        if (i === 0) {
+            return lower;
+        }
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+    })
         .join("");
-    return cleaned;
 }
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -129,10 +135,21 @@ import { map } from 'rxjs/operators';
 import { I${cap} } from '@app/shared/models/I${cap}';
 
 export const ${name}LoadEffects = createEffect(
-  (actions = inject(Actions)) => {
+  (actions = inject(Actions), http = inject(HttpClient)) => {
     return actions.pipe(
       ofType(${name}Actions.load${cap}),
-      map(() => ${name}Actions.load${cap}Success({ items: [] }))
+       mergeMap(() =>
+        http.get<I${cap}[]>([URL]).pipe(
+          map((items) =>
+            ${name}Actions.load${cap}Success({items})
+          ),
+          catchError((err: HttpErrorResponse) => {
+            const error = mapHttpError(err);
+            return of(${name}Actions.load${cap}Failure())
+            );
+          })
+        )
+      )
     );
   },
   { functional: true }
